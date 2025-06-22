@@ -8,16 +8,6 @@ resource "aws_security_group" "skmt_sg" {
   }
 }
 
-resource "aws_security_group_rule" "skmt_sg_rule_ssh" {
-  security_group_id = aws_security_group.skmt_sg.id
-  type              = "ingress"
-  from_port         = 22
-  to_port           = 22
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks  = ["::/0"]
-}
-
 resource "aws_security_group_rule" "skmt_sg_rule_egress" {
   security_group_id = aws_security_group.skmt_sg.id
   type              = "egress"
