@@ -2,6 +2,17 @@ provider "aws" {
   region = "us-east-1"
 }
 
+resource "tls_private_key" "ssh_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "skmt_key_pair" {
+  key_name   = "skmt_key_pair"
+  public_key = tls_private_key.ssh_key.public_key_openssh
+}
+
+
 resource "aws_instance" "skmt-ec2-instance" {
   ami           = "ami-0c94855ba95c71c99"  # Example Amazon Linux 2 AMI in us-east-1
   instance_type = "t2.micro"
