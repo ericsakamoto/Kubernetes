@@ -36,7 +36,7 @@ resource "aws_route" "skmt_route_1" {
 }
 
 resource "aws_route_table_association" "a" {
-  subnet_id      = aws_subnet.skmt_public_subnet.id
+  subnet_id      = aws_subnet.skmt_private_subnet.id
   route_table_id = aws_route_table.skmt_route_table.id
 }
 
@@ -51,7 +51,7 @@ resource "aws_vpc_endpoint" "ssm" {
 }
 
 resource "aws_vpc_endpoint" "ec2messages" {
-  vpc_id            = aws_vpc.main.id
+  vpc_id            = aws_vpc.skmt_vpc.id
   service_name      = "com.amazonaws.${var.region}.ec2messages"
   vpc_endpoint_type = "Interface"
   subnet_ids        = [aws_subnet.skmt_private_subnet.id]
@@ -60,7 +60,7 @@ resource "aws_vpc_endpoint" "ec2messages" {
 }
 
 resource "aws_vpc_endpoint" "ssmmessages" {
-  vpc_id            = aws_vpc.main.id
+  vpc_id            = aws_vpc.skmt_vpc.id
   service_name      = "com.amazonaws.${var.region}.ssmmessages"
   vpc_endpoint_type = "Interface"
   subnet_ids        = [aws_subnet.skmt_private_subnet.id]
