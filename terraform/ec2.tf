@@ -16,6 +16,8 @@ resource "aws_key_pair" "skmt_key_pair" {
 resource "aws_instance" "skmt-ec2-instance" {
   ami           = "ami-0c94855ba95c71c99"  # Example Amazon Linux 2 AMI in us-east-1
   instance_type = "t2.micro"
+  subnet_id              = aws_subnet.skmt_public_subnet.id
+  vpc_security_group_ids = [aws_security_group.skmt_sg.id]
   
   tags = {
     Name = "skmt-ec2-instance"
