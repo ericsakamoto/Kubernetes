@@ -17,42 +17,71 @@ resource "aws_instance" "skmt-ec2-instance" {
   
   user_data = <<-EOF
           #!/bin/bash
-          set -euxo pipefail
 
-          # Install base dependencies
-          yum install -y curl wget unzip git bash-completion
+          # Update system packages
+          sudo yum update -y
 
-          # Install k3s (includes kubectl and containerd)
-          curl -sfL https://get.k3s.io | sh -
+          # Install dependencies
+          sudo yum install -y curl wget git unzip bash-completion conntrack socat
 
-          # Wait for k3s to start
-          sleep 10
+          # Install Docker
+          sudo amazon-linux-extras enable docker
+          sudo yum install -y docker
+          sudo systemctl start docker
+          sudo systemctl enable docker
 
-          # Set up kubectl for ec2-user
-          mkdir -p /home/ec2-user/.kube
-          cp /etc/rancher/k3s/k3s.yaml /home/ec2-user/.kube/config
-          chown -R ec2-user:ec2-user /home/ec2-user/.kube
-          sed -i 's/127.0.0.1/localhost/' /home/ec2-user/.kube/config
+          # Add ec2-user to docker group
+          sudo usermod -aG docker ec2-user
+          newgrp docker
 
-          # Add kubectl alias for ec2-user
-          echo "alias kubectl='/usr/local/bin/kubectl'" >> /home/ec2-user/.bashrc
+          # Install kubectl
+          curl -LO "https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
 
-          # Install kubectx and kubens
-          KUBECTX_DIR="/opt/kubectx"
-          git clone https://github.com/ahmetb/kubectx.git "$KUBECTX_DIR"
-          ln -s "$KUBECTX_DIR/kubectx" /usr/local/bin/kubectx
-          ln -s "$KUBECTX_DIR/kubens" /usr/local/bin/kubens
-          chmod +x /usr/local/bin/kubectx /usr/local/bin/kubens
+          # Enable kubectl bash completion
+          echo "source <(kubectl completion bash)" >> ~/.bashrc
+          echo "alias k=kubectl" >> ~/.bashrc
+          echo "complete -F __start_kubectl k" >> ~/.bashrc
 
-          # Optional: enable bash completion for kubectl, kubectx, and kubens
-          /usr/local/bin/kubectl completion bash > /etc/bash_completion.d/kubectl
-          "$KUBECTX_DIR"/completion/kubectx.bash > /etc/bash_completion.d/kubectx
-          "$KUBECTX_DIR"/completion/kubens.bash > /etc/bash_completion.d/kubens
+          # Install Minikube
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
 
-          # Set ownership for ec2-user access
-          chown -R ec2-user:ec2-user "$KUBECTX_DIR"
+          # Start Minikube using Docker driver
+          minikube start --driver=docker
 
-          # Pre-load context and node info
-          /usr/local/bin/kubectl get nodes
+          # Verify installation
+          minikube status
+
+          # Clone the kubectx repository
+          git clone https://github.com/ahmetb/kubectx.git ~/.kubectx
+
+          # Add binaries to your PATH
+          sudo ln -s ~/.kubectx/kubectx /usr/local/bin/kubectx
+          sudo ln -s ~/.kubectx/kubens /usr/local/bin/kubens
+
+          # Optional: Enable bash completion
+          mkdir -p ~/.bash_completion.d
+          ln -s ~/.kubectx/completion/kubens.bash ~/.bash_completion.d/kubens
+          ln -s ~/.kubectx/completion/kubectx.bash ~/.bash_completion.d/kubectx
+          echo 'source ~/.bash_completion.d/kubectx' >> ~/.bashrc
+          echo 'source ~/.bash_completion.d/kubens' >> ~/.bashrc
+
+          # Apply changes to current shell
+          source ~/.bashrc
+
+          # Download the latest release (Linux AMD64 binary)
+          curl -Lo k9s.tar.gz https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_amd64.tar.gz
+
+          # Extract the binary
+          tar -xzf k9s.tar.gz
+
+          # Move to a directory in your PATH
+          sudo mv k9s /usr/local/bin/
+
+          # Clean up
+          rm k9s.tar.gz
+
           EOF
 }
