@@ -51,8 +51,8 @@ resource "aws_instance" "skmt-ec2-instance" {
           # Start Minikube using Docker driver
           minikube start --driver=docker
 
-          # Verify installation
-          minikube status
+          # Install git
+          sudo yum install -y git
 
           # Clone the kubectx repository
           git clone https://github.com/ahmetb/kubectx.git ~/.kubectx
