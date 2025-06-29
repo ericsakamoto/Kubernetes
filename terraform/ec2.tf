@@ -17,29 +17,42 @@ resource "aws_instance" "skmt-ec2-instance" {
   
   user_data = <<-EOF
           #!/bin/bash
-          # Update system packages
-          sudo yum update -y
-          
-          # Install dependencies
-          sudo yum install -y curl wget conntrack
+          set -euxo pipefail
 
-          # Install Docker
-          sudo amazon-linux-extras install docker -y
-          sudo systemctl enable docker
-          sudo systemctl start docker
+          # Install base dependencies
+          yum install -y curl wget unzip git bash-completion
 
-          # Install Minikube
-          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+          # Install k3s (includes kubectl and containerd)
+          curl -sfL https://get.k3s.io | sh -
 
-          # Install kubectl
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          sudo install kubectl /usr/local/bin/kubectl
+          # Wait for k3s to start
+          sleep 10
 
-          # Enable docker for the ec2-user
-          sudo usermod -aG docker ec2-user
+          # Set up kubectl for ec2-user
+          mkdir -p /home/ec2-user/.kube
+          cp /etc/rancher/k3s/k3s.yaml /home/ec2-user/.kube/config
+          chown -R ec2-user:ec2-user /home/ec2-user/.kube
+          sed -i 's/127.0.0.1/localhost/' /home/ec2-user/.kube/config
 
-          # Start Minikube (optional, will need --driver=none for EC2 VM)
-          minikube start --driver=none
+          # Add kubectl alias for ec2-user
+          echo "alias kubectl='/usr/local/bin/kubectl'" >> /home/ec2-user/.bashrc
+
+          # Install kubectx and kubens
+          KUBECTX_DIR="/opt/kubectx"
+          git clone https://github.com/ahmetb/kubectx.git "$KUBECTX_DIR"
+          ln -s "$KUBECTX_DIR/kubectx" /usr/local/bin/kubectx
+          ln -s "$KUBECTX_DIR/kubens" /usr/local/bin/kubens
+          chmod +x /usr/local/bin/kubectx /usr/local/bin/kubens
+
+          # Optional: enable bash completion for kubectl, kubectx, and kubens
+          /usr/local/bin/kubectl completion bash > /etc/bash_completion.d/kubectl
+          "$KUBECTX_DIR"/completion/kubectx.bash > /etc/bash_completion.d/kubectx
+          "$KUBECTX_DIR"/completion/kubens.bash > /etc/bash_completion.d/kubens
+
+          # Set ownership for ec2-user access
+          chown -R ec2-user:ec2-user "$KUBECTX_DIR"
+
+          # Pre-load context and node info
+          /usr/local/bin/kubectl get nodes
           EOF
 }
