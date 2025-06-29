@@ -20,6 +20,7 @@ resource "aws_instance" "skmt-ec2-instance" {
   vpc_security_group_ids = [aws_security_group.skmt_sg.id]
   iam_instance_profile        = aws_iam_instance_profile.ssm_profile.name
   associate_public_ip_address = false
+  key_name = "skmt_aws5_keypair_us_east_1"
   
   tags = {
     Name = "skmt-ec2-instance"
@@ -33,29 +34,28 @@ resource "aws_instance" "skmt-ec2-instance" {
           # Install dependencies
           sudo yum install -y curl wget conntrack
 
-          if command -v yum &> /dev/null; then
-            yum install -y amazon-ssm-agent
-            systemctl enable amazon-ssm-agent
-            systemctl start amazon-ssm-agent
-          fi
+          #   yum install -y amazon-ssm-agent
+          #   systemctl enable amazon-ssm-agent
+          #   systemctl start amazon-ssm-agent
+          # fi
 
-          # Install Docker
-          sudo amazon-linux-extras install docker -y
-          sudo systemctl enable docker
-          sudo systemctl start docker
+          # # Install Docker
+          # sudo amazon-linux-extras install docker -y
+          # sudo systemctl enable docker
+          # sudo systemctl start docker
 
-          # Install Minikube
-          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+          # # Install Minikube
+          # curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          # sudo install minikube-linux-amd64 /usr/local/bin/minikube
 
-          # Install kubectl
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          sudo install kubectl /usr/local/bin/kubectl
+          # # Install kubectl
+          # curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          # sudo install kubectl /usr/local/bin/kubectl
 
-          # Enable docker for the ec2-user
-          sudo usermod -aG docker ec2-user
+          # # Enable docker for the ec2-user
+          # sudo usermod -aG docker ec2-user
 
-          # Start Minikube (optional, will need --driver=none for EC2 VM)
-          # minikube start --driver=none
+          # # Start Minikube (optional, will need --driver=none for EC2 VM)
+          # # minikube start --driver=none
           EOF
 }
