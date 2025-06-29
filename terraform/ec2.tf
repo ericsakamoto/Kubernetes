@@ -33,6 +33,12 @@ resource "aws_instance" "skmt-ec2-instance" {
           # Install dependencies
           sudo yum install -y curl wget conntrack
 
+          if command -v yum &> /dev/null; then
+            yum install -y amazon-ssm-agent
+            systemctl enable amazon-ssm-agent
+            systemctl start amazon-ssm-agent
+          fi
+
           # Install Docker
           sudo amazon-linux-extras install docker -y
           sudo systemctl enable docker
