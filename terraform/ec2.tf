@@ -58,8 +58,8 @@ resource "aws_instance" "skmt-ec2-instance" {
           git clone https://github.com/ahmetb/kubectx.git ~/.kubectx
 
           # Add binaries to your PATH
-          sudo ln -s ~/.kubectx/kubectx /usr/local/bin/kubectx
-          sudo ln -s ~/.kubectx/kubens /usr/local/bin/kubens
+          sudo ln -s /home/ec2-user/.kubectx/kubectx /usr/local/bin/kubectx
+          sudo ln -s /home/ec2-user/.kubectx/kubens /usr/local/bin/kubens
 
           # Optional: Enable bash completion
           mkdir -p ~/.bash_completion.d
