@@ -19,7 +19,7 @@ resource "aws_instance" "skmt-ec2-instance" {
   subnet_id              = aws_subnet.skmt_private_subnet.id
   vpc_security_group_ids = [aws_security_group.skmt_sg.id]
   iam_instance_profile        = aws_iam_instance_profile.ssm_profile.name
-  associate_public_ip_address = false
+  associate_public_ip_address = true
   key_name = "skmt_aws5_keypair_us_east_1"
   
   tags = {
