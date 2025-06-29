@@ -2,20 +2,9 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "tls_private_key" "ssh_key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "aws_key_pair" "skmt_key_pair" {
-  key_name   = "skmt_key_pair"
-  public_key = tls_private_key.ssh_key.public_key_openssh
-}
-
-
 resource "aws_instance" "skmt-ec2-instance" {
   ami           = "ami-0c94855ba95c71c99"  # Example Amazon Linux 2 AMI in us-east-1
-  instance_type = "t2.micro"
+  instance_type = "t3.xlarge"
   subnet_id              = aws_subnet.skmt_private_subnet.id
   vpc_security_group_ids = [aws_security_group.skmt_sg.id]
   iam_instance_profile        = aws_iam_instance_profile.ssm_profile.name
@@ -51,6 +40,6 @@ resource "aws_instance" "skmt-ec2-instance" {
           sudo usermod -aG docker ec2-user
 
           # Start Minikube (optional, will need --driver=none for EC2 VM)
-          # minikube start --driver=none
+          minikube start --driver=none
           EOF
 }
