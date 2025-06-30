@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-a
+  template:
+    metadata:
+      labels:
+        app: app-a
+    spec:
+      containers:
+      - name: app-a
+        image: ericsakamoto/app-a:latest
+        env:
+        - name: APP_B_URL
+          value: http://app-b:5000/process
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-a
+spec:
+  type: LoadBalancer
+  selector:
+    app: app-a
+  ports:
+  - protocol: TCP
+    port: 443
+    targetPort: 5000
