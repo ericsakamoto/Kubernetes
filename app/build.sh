@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Login to Docker Hub
-docker login
+#docker login
 
 # Build and push App A
 docker build -t ericsakamoto/app-a:latest -f frontend/Dockerfile frontend/.
