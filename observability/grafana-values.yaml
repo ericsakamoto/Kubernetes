@@ -1,0 +1,10 @@
+resources:
+  requests:
+    memory: 50Mi
+    cpu: 20m
+  limits:
+    memory: 150Mi
+    cpu: 100m
+persistence:
+  enabled: false
+adminPassword: "admin"
