@@ -36,6 +36,11 @@ opentelemetry.instrumentation.logging.instrument()
 # Standard logging usage
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
 logger.info("This log will be captured by OpenTelemetry")
 
 app = Flask(__name__)
