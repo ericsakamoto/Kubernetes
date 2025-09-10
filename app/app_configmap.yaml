@@ -7,8 +7,8 @@ data:
     extensions:
       basicauth/client:
         client_auth:
-          username: ${env:GRAFANA_INSTANCE_ID}
-          password: ${env:GRAFANA_API_KEY}
+          username: "${env:GRAFANA_INSTANCE_ID}"
+          password: "${env:GRAFANA_API_KEY}"
 
     receivers:
       otlp:
