@@ -5,4 +5,4 @@
 
 kubectl apply -f backend/app-b-deployment.yaml
 kubectl apply -f frontend/app-a-deployment.yaml
-kubectl apply -f app-configmap.yaml
+kubectl apply -f app_configmap.yaml
