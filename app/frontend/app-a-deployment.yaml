@@ -15,6 +15,7 @@ spec:
       containers:
       - name: app-a
         image: ericsakamoto/app-a:latest
+        imagePullPolicy: Never
         env:
         - name: APP_B_URL
           value: http://app-b:5000/process

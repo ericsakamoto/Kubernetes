@@ -15,6 +15,7 @@ spec:
       containers:
       - name: app-b
         image: ericsakamoto/app-b:latest
+        imagePullPolicy: Never
         env:
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: "http://127.0.0.1:4318"
