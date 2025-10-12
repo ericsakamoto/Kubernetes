@@ -20,10 +20,10 @@ from opentelemetry._logs import set_logger_provider, get_logger
 
 
 
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
+#from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+#from opentelemetry.sdk.trace.export import BatchSpanProcessor
 #from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+#from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
 
 import logging
 import requests
@@ -63,7 +63,7 @@ handler = LoggingHandler(level=logging.INFO, logger_provider=provider)
 logging.basicConfig(handlers=[handler], level=logging.INFO)
 
 logging.info("This is an OpenTelemetry log record!")
-
+ 
 
 
 # ---- Logs: set up both stdout and OTLP export ----
