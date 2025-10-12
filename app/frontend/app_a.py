@@ -18,13 +18,6 @@ from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor, ConsoleLogExporter
 from opentelemetry._logs import set_logger_provider, get_logger
 
-
-
-#from opentelemetry.sdk.resources import SERVICE_NAME, Resource
-#from opentelemetry.sdk.trace.export import BatchSpanProcessor
-#from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-#from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
-
 import logging
 import requests
 import os
@@ -66,38 +59,6 @@ handler = LoggingHandler(level=logging.INFO, logger_provider=provider)
 logging.basicConfig(handlers=[handler], level=logging.INFO)
 
 logging.info("This is an OpenTelemetry log record!")
- 
-
-
-# ---- Logs: set up both stdout and OTLP export ----
-# otel_logger_provider = LoggerProvider(
-#     resource=Resource.create({SERVICE_NAME: "APP-A"})
-# )
-# otel_log_exporter = OTLPLogExporter()
-# otel_log_processor = BatchLogRecordProcessor(otel_log_exporter)
-# otel_logger_provider.add_log_record_processor(otel_log_processor)
-
-# # Do NOT call opentelemetry.instrumentation.logging.instrument()
-# # Configure standard logging to stdout
-# root_logger = logging.getLogger()
-# root_logger.setLevel(logging.INFO)
-
-# # Clear any pre-existing handlers that might suppress stdout in containers
-# root_logger.handlers = []
-
-# stdout_handler = logging.StreamHandler()  # writes to stdout -> visible in `kubectl logs`
-# stdout_handler.setLevel(logging.INFO)
-# stdout_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
-# root_logger.addHandler(stdout_handler)
-
-# # Add OTel logging handler so logs are also exported to your collector
-# otel_handler = LoggingHandler(level=logging.INFO, logger_provider=otel_logger_provider)
-# root_logger.addHandler(otel_handler)
-
-# logger = logging.getLogger(__name__)
-# logger.info("Application starting: logs will go to stdout and OTLP")
-
-
 
 
 app = Flask(__name__)

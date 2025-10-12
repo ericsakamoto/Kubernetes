@@ -1,45 +1,59 @@
 from flask import Flask, request, jsonify
+
 from opentelemetry import trace
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk._logs import LoggerProvider
-from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
-from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry.sdk.trace.export import (
+    BatchSpanProcessor,
+    ConsoleSpanExporter,
+)
+
+from opentelemetry import metrics
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import (
+    ConsoleMetricExporter,
+    PeriodicExportingMetricReader,
+)
+
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor, ConsoleLogExporter
+from opentelemetry._logs import set_logger_provider, get_logger
 
 import logging
 
-# Set up tracing (optional, but common with logging)
-trace.set_tracer_provider(
-    TracerProvider(
-        resource=Resource.create({SERVICE_NAME: "APP-B"})
-    )
-)
-tracer = trace.get_tracer(__name__)
-span_processor = BatchSpanProcessor(OTLPSpanExporter())
-trace.get_tracer_provider().add_span_processor(span_processor)
+# ---- Traces ----
+provider = TracerProvider()
+processor = BatchSpanProcessor(ConsoleSpanExporter())
+provider.add_span_processor(processor)
 
-# Set up logging
-logger_provider = LoggerProvider(
-    resource=Resource.create({SERVICE_NAME: "APP-B"})
-)
-log_exporter = OTLPLogExporter()
-log_processor = BatchLogRecordProcessor(log_exporter)
-logger_provider.add_log_record_processor(log_processor)
+# Sets the global default tracer provider
+trace.set_tracer_provider(provider)
 
-import opentelemetry.instrumentation.logging
-opentelemetry.instrumentation.logging.instrument()
+# Creates a tracer from the global tracer provider
+tracer = trace.get_tracer("skmt.tracer.app_a")
 
-# Standard logging usage
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-stream_handler = logging.StreamHandler()
-stream_handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-stream_handler.setFormatter(formatter)
-logger.addHandler(stream_handler)
-logger.info("This log will be captured by OpenTelemetry")
+# ---- Metrics ----
+metric_reader = PeriodicExportingMetricReader(ConsoleMetricExporter())
+provider = MeterProvider(metric_readers=[metric_reader])
+
+# Sets the global default meter provider
+metrics.set_meter_provider(provider)
+
+# Creates a meter from the global meter provider
+meter = metrics.get_meter("skmt.meter.app_a")
+
+# ---- Logs ----
+provider = LoggerProvider()
+processor = BatchLogRecordProcessor(ConsoleLogExporter())
+provider.add_log_record_processor(processor)
+# Sets the global default logger provider
+set_logger_provider(provider)
+
+logger = get_logger(__name__)
+
+handler = LoggingHandler(level=logging.INFO, logger_provider=provider)
+logging.basicConfig(handlers=[handler], level=logging.INFO)
+
+logging.info("This is an OpenTelemetry log record!")
 
 app = Flask(__name__)
 
