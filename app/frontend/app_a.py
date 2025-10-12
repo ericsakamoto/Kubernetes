@@ -30,6 +30,7 @@ import requests
 import os
 
 # ---- Traces ----
+print("Setting up tracing...")
 provider = TracerProvider()
 processor = BatchSpanProcessor(ConsoleSpanExporter())
 provider.add_span_processor(processor)
@@ -41,6 +42,7 @@ trace.set_tracer_provider(provider)
 tracer = trace.get_tracer("skmt.tracer.app_a")
 
 # ---- Metrics ----
+print("Setting up metrics...")
 metric_reader = PeriodicExportingMetricReader(ConsoleMetricExporter())
 provider = MeterProvider(metric_readers=[metric_reader])
 
@@ -51,6 +53,7 @@ metrics.set_meter_provider(provider)
 meter = metrics.get_meter("skmt.meter.app_a")
 
 # ---- Logs ----
+print("Setting up logging...")
 provider = LoggerProvider()
 processor = BatchLogRecordProcessor(ConsoleLogExporter())
 provider.add_log_record_processor(processor)
@@ -107,6 +110,7 @@ def send():
     if value is None:
         return jsonify({"error": "Missing 'value'"}), 400
     try:
+        print("Calling app_b with value", value)
         logging.info("Calling app_b with value %s", value)
         response = requests.post(APP_B_URL, json={"value": value})
         logging.info("Response from app_b: %s", response.status_code)
