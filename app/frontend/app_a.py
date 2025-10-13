@@ -66,19 +66,20 @@ APP_B_URL = os.environ.get("APP_B_URL", "http://app-b:5000/process")
 
 @app.route("/send", methods=["POST"])
 def send():
-    data = request.get_json()
-    value = data.get("value")
-    if value is None:
-        return jsonify({"error": "Missing 'value'"}), 400
-    try:
-        print("Calling app_b with value", value)
-        logging.info("Calling app_b with value %s", value)
-        response = requests.post(APP_B_URL, json={"value": value})
-        logging.info("Response from app_b: %s", response.status_code)
-        return jsonify(response.json()), response.status_code
-    except Exception as e:
-        logging.exception("Error calling app_b")  # ensures stack trace in both outputs
-        return jsonify({"error": str(e)}), 500
+    with tracer.start_as_current_span("span-app-a") as span:
+        data = request.get_json()
+        value = data.get("value")
+        if value is None:
+            return jsonify({"error": "Missing 'value'"}), 400
+        try:
+            print("Calling app_b with value", value)
+            logging.info("Calling app_b with value %s", value)
+            response = requests.post(APP_B_URL, json={"value": value})
+            logging.info("Response from app_b: %s", response.status_code)
+            return jsonify(response.json()), response.status_code
+        except Exception as e:
+            logging.exception("Error calling app_b")  # ensures stack trace in both outputs
+            return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     # In production you would typically run under gunicorn/uwsgi; this is fine for demos.

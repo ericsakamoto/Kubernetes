@@ -59,14 +59,15 @@ app = Flask(__name__)
 
 @app.route("/process", methods=["POST"])
 def process():
-    data = request.get_json()
-    value = data.get("value")
-    logging.info("Input value received", extra={"value": value})
-    if value is None:
-        return jsonify({"error": "Missing 'value'"}), 400
-    result = value * 1000
-    logging.info("Processed value", extra={"result": result})
-    return jsonify({"result": result})
+    with tracer.start_as_current_span("span-app-b") as span:
+        data = request.get_json()
+        value = data.get("value")
+        logging.info("Input value received", extra={"value": value})
+        if value is None:
+            return jsonify({"error": "Missing 'value'"}), 400
+        result = value * 1000
+        logging.info("Processed value", extra={"result": result})
+        return jsonify({"result": result})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
