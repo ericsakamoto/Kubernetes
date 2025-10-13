@@ -61,11 +61,11 @@ app = Flask(__name__)
 def process():
     data = request.get_json()
     value = data.get("value")
-    logger.info("Input value received", extra={"value": value})
+    logging.info("Input value received", extra={"value": value})
     if value is None:
         return jsonify({"error": "Missing 'value'"}), 400
     result = value * 1000
-    logger.info("Processed value", extra={"result": result})
+    logging.info("Processed value", extra={"result": result})
     return jsonify({"result": result})
 
 if __name__ == "__main__":
