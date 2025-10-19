@@ -1,9 +1,16 @@
 #!/bin/bash
-PORT=$1
-INPUT=$2
+SERVICE_NAME="app-a"
+NAMESPACE="skmt"
+INPUT=$1
 
-echo "Calling app on port ${PORT} with input ${INPUT}"
+# Get Minikube IP
+MINIKUBE_IP=$(minikube ip)
 
-curl -X POST http://192.168.49.2:${PORT}/send \
+# Get NodePort for the service
+PORT=$(kubectl get svc ${SERVICE_NAME} -n ${NAMESPACE} -o jsonpath='{.spec.ports[0].nodePort}')
+
+echo "Calling app '${SERVICE_NAME}' on ${MINIKUBE_IP}:${PORT} with input ${INPUT}"
+
+curl -X POST http://${MINIKUBE_IP}:${PORT}/send \
      -H "Content-Type: application/json" \
      -d "{\"value\": ${INPUT}}"
